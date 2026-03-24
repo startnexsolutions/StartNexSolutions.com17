@@ -46,6 +46,7 @@
                     <li><a href="#services" class="nav-link">Services</a></li>
                     <li><a href="#packages" class="nav-link">Packages</a></li>
                     <li><a href="#testimonials" class="nav-link">Testimonials</a></li>
+                    <li><a href="#blog" class="nav-link">Blog</a></li>
                     <li><a href="#contact" class="nav-link">Contact Us</a></li>
                     <li><a href="tel:+919168117217" class="btn btn-primary"><i class="fas fa-phone"></i> Call Now</a></li>
                 </ul>
@@ -200,11 +201,11 @@
                 </div>
                 <div class="service-card animate-text" data-animation="slide-up" data-delay="0.4">
                     <div class="service-icon">
-                        <i class="fas fa-envelope"></i>
+                        <i class="fas fa-lightbulb"></i>
                     </div>
-                    <h3>Email Marketing</h3>
-                    <p>Build relationships with customers through targeted email campaigns</p>
-                    <a href="#contact" class="service-link">Start Campaign <i class="fas fa-arrow-right"></i></a>
+                    <h3>Business Strategies</h3>
+                    <p>Develop comprehensive business strategies to maximize growth and competitive advantage</p>
+                    <a href="#contact" class="service-link">Get Strategy <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="service-card animate-text" data-animation="slide-up" data-delay="0.5">
                     <div class="service-icon">
@@ -359,6 +360,114 @@
         </div>
     </section>
 
+    <!-- Blog Section -->
+    <section class="blog" id="blog">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title animate-text" data-animation="slide-up">
+                    <span class="text-dark">Digital Marketing</span>
+                    <span class="text-yellow">Blog & Tips</span>
+                </h2>
+                <p class="section-subtitle animate-text" data-animation="slide-up" data-delay="0.2">
+                    Latest insights, strategies, and tips for digital marketing success
+                </p>
+            </div>
+            <div class="blog-header animate-text" data-animation="slide-up">
+                <button class="btn btn-yellow" id="writeBlogBtn"><i class="fas fa-pen-fancy"></i> Write a Blog Post</button>
+                <button class="btn btn-outline" id="manageBlogBtn" style="margin-left: 10px;"><i class="fas fa-lock"></i> Manage Blogs</button>
+            </div>
+            <div class="blog-posts-grid" id="blogPostsContainer">
+                <!-- Blog posts will be dynamically loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Write Modal -->
+    <div class="modal" id="blogModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Write a New Blog Post</h3>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <form id="blogForm" class="blog-form">
+                <div class="form-group">
+                    <label for="blogTitle">Blog Title *</label>
+                    <input type="text" id="blogTitle" placeholder="Enter blog title" required>
+                </div>
+                <div class="form-group">
+                    <label for="blogCategory">Category *</label>
+                    <select id="blogCategory" required>
+                        <option value="">Select a category</option>
+                        <option value="SEO">SEO Tips</option>
+                        <option value="Social Media">Social Media Marketing</option>
+                        <option value="Digital Marketing">Digital Marketing Strategy</option>
+                        <option value="Web Development">Web Development</option>
+                        <option value="Business Strategies">Business Strategies</option>
+                        <option value="PPC">Google Ads & PPC</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="blogAuthor">Author Name *</label>
+                    <input type="text" id="blogAuthor" placeholder="Your name" required>
+                </div>
+                <div class="form-group">
+                    <label for="blogContent">Blog Content *</label>
+                    <textarea id="blogContent" placeholder="Write your blog content here..." rows="8" required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" id="cancelBlogBtn">Cancel</button>
+                    <button type="submit" class="btn btn-yellow">
+                        <i class="fas fa-check"></i> Publish Blog Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Full Blog Post Modal -->
+    <div class="modal" id="fullBlogModal">
+        <div class="modal-content full-blog-modal-content">
+            <div class="modal-header">
+                <h3 id="fullBlogTitle"></h3>
+                <button class="close-btn" id="closeFullBlogModal">&times;</button>
+            </div>
+            <div class="full-blog-content">
+                <div class="full-blog-meta">
+                    <span class="full-blog-author"><i class="fas fa-user-circle"></i> <span id="fullBlogAuthor"></span></span>
+                    <span class="full-blog-date"><i class="fas fa-calendar"></i> <span id="fullBlogDate"></span></span>
+                    <span class="full-blog-category"><span id="fullBlogCategory"></span></span>
+                </div>
+                <div class="full-blog-text" id="fullBlogText"></div>
+                <div class="full-blog-actions">
+                    <button class="delete-btn" id="deleteFullBlogBtn">
+                        <i class="fas fa-trash"></i> Delete Post
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Management Password Modal -->
+    <div class="modal" id="blogPasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-lock"></i> Blog Management Password</h3>
+                <button class="close-btn" id="closeBlogPasswordModal">&times;</button>
+            </div>
+            <div class="blog-password-form">
+                <p>Enter the password to manage and delete blog posts</p>
+                <div class="form-group">
+                    <input type="password" id="blogPassword" placeholder="Enter password" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" id="cancelPasswordBtn">Cancel</button>
+                    <button type="button" class="btn btn-yellow" id="verifyPasswordBtn">Verify Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Contact Section -->
     <section class="contact" id="contact">
         <div class="container">
@@ -391,7 +500,7 @@
                                 <option value="smm">Social Media Marketing</option>
                                 <option value="web">Web Development</option>
                                 <option value="ppc">Google Ads (PPC)</option>
-                                <option value="email">Email Marketing</option>
+                                <option value="business-strategies">Business Strategies</option>
                                 <option value="ecommerce">E-commerce SEO</option>
                             </select>
                         </div>
@@ -451,7 +560,7 @@
                 <div class="footer-logo">
                     <div class="logo-text">
                         <span class="logo-primary">DIGITAL MARKETING</span>
-                        <span class="logo-accent">KING</span>
+                        <span class="logo-accent"></span>
                     </div>
                     <p>India's leading digital marketing agency providing SEO, social media marketing, PPC, and web development services.</p>
                     <div class="footer-contact">
@@ -466,6 +575,7 @@
                         <li><a href="#about"><i class="fas fa-chevron-right"></i> About Us</a></li>
                         <li><a href="#services"><i class="fas fa-chevron-right"></i> Services</a></li>
                         <li><a href="#packages"><i class="fas fa-chevron-right"></i> Packages</a></li>
+                        <li><a href="#blog"><i class="fas fa-chevron-right"></i> Blog</a></li>
                         <li><a href="#contact"><i class="fas fa-chevron-right"></i> Contact Us</a></li>
                     </ul>
                 </div>

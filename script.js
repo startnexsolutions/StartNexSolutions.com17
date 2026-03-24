@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initFormAnimations();
   initHoverEffects();
   initPageLoader();
+  initBlog();
 });
 
 // Mobile Menu Toggle
@@ -614,3 +615,370 @@ window.addEventListener('load', () => {
   
   images.forEach(img => imageObserver.observe(img));
 });
+
+/* ==================== Blog Functionality ==================== */
+
+// Blog password for management (Change this to your desired password)
+const BLOG_PASSWORD = 'admin123';
+let blogAuthenticatedSession = false;
+
+// Initialize Blog
+function initBlog() {
+  const writeBlogBtn = document.getElementById('writeBlogBtn');
+  const blogModal = document.getElementById('blogModal');
+  const blogForm = document.getElementById('blogForm');
+  const closeModal = document.getElementById('closeModal');
+  const cancelBlogBtn = document.getElementById('cancelBlogBtn');
+  
+  if (!writeBlogBtn || !blogModal) return;
+  
+  // Open modal
+  writeBlogBtn.addEventListener('click', () => {
+      blogModal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+  });
+  
+  // Close modal function
+  const closeModalFunc = () => {
+      blogModal.classList.remove('show');
+      document.body.style.overflow = 'auto';
+      blogForm.reset();
+  };
+  
+  // Close modal buttons
+  closeModal.addEventListener('click', closeModalFunc);
+  cancelBlogBtn.addEventListener('click', closeModalFunc);
+  
+  // Close modal on background click
+  blogModal.addEventListener('click', (e) => {
+      if (e.target === blogModal) {
+          closeModalFunc();
+      }
+  });
+  
+  // Handle form submission
+  if (blogForm) {
+      blogForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          
+          const title = document.getElementById('blogTitle').value.trim();
+          const category = document.getElementById('blogCategory').value;
+          const author = document.getElementById('blogAuthor').value.trim();
+          const content = document.getElementById('blogContent').value.trim();
+          
+          if (title && category && author && content) {
+              // Create blog post object
+              const blogPost = {
+                  id: Date.now(),
+                  title,
+                  category,
+                  author,
+                  content,
+                  date: new Date().toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                  })
+              };
+              
+              // Save to localStorage
+              saveBlogPost(blogPost);
+              
+              // Show success message
+              showNotification('Blog post published successfully!', 'success');
+              
+              // Close modal and reload posts
+              closeModalFunc();
+              loadBlogPosts();
+          } else {
+              showNotification('Please fill in all fields', 'error');
+          }
+      });
+  }
+  
+  // Load blog posts on page load
+  loadBlogPosts();
+}
+
+// Save blog post to localStorage
+function saveBlogPost(post) {
+  let blogs = JSON.parse(localStorage.getItem('blogPosts')) || [];
+  blogs.unshift(post);
+  localStorage.setItem('blogPosts', JSON.stringify(blogs));
+}
+
+// Load and display blog posts
+function loadBlogPosts() {
+  const container = document.getElementById('blogPostsContainer');
+  if (!container) return;
+  
+  const blogs = JSON.parse(localStorage.getItem('blogPosts')) || [];
+  
+  if (blogs.length === 0) {
+      container.innerHTML = `
+          <div class="empty-blog-state" style="grid-column: 1 / -1;">
+              <i class="fas fa-pen-fancy"></i>
+              <h3>No Blog Posts Yet</h3>
+              <p>Be the first to share your digital marketing insights!</p>
+          </div>
+      `;
+      return;
+  }
+  
+  container.innerHTML = blogs.map(blog => `
+      <div class="blog-card animate-text" data-animation="slide-up">
+          <div class="blog-thumbnail">
+              <i class="fas fa-blog"></i>
+          </div>
+          <div class="blog-category">
+              <span class="blog-category-tag">${blog.category}</span>
+          </div>
+          <div class="blog-content">
+              <h3 class="blog-title">${blog.title}</h3>
+              <div class="blog-meta">
+                  <div class="blog-author">
+                      <i class="fas fa-user-circle"></i> ${blog.author}
+                  </div>
+                  <div class="blog-date">
+                      <i class="fas fa-calendar"></i> ${blog.date}
+                  </div>
+              </div>
+              <p class="blog-text">${blog.content}</p>
+              <div class="blog-actions">
+                  <button class="view-btn" onclick="viewFullBlogPost(${blog.id})">
+                      <i class="fas fa-eye"></i> View Full
+                  </button>
+                  ${blogAuthenticatedSession ? `<button class="delete-btn" onclick="deleteBlogPost(${blog.id})">
+                      <i class="fas fa-trash"></i> Delete
+                  </button>` : ''}
+              </div>
+          </div>
+      </div>
+  `).join('');
+  
+  
+  // Re-apply animations
+  const newCards = container.querySelectorAll('.blog-card');
+  newCards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(30px)';
+      setTimeout(() => {
+          card.style.transition = 'all 0.6s ease';
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+      }, index * 100);
+  });
+}
+
+// Delete blog post
+function deleteBlogPost(id) {
+  // Check if user is authenticated
+  if (!blogAuthenticatedSession) {
+      showNotification('Please use "Manage Blogs" to authenticate before deleting.', 'error');
+      return;
+  }
+  
+  if (confirm('Are you sure you want to delete this blog post?')) {
+      let blogs = JSON.parse(localStorage.getItem('blogPosts')) || [];
+      blogs = blogs.filter(blog => blog.id !== id);
+      localStorage.setItem('blogPosts', JSON.stringify(blogs));
+      
+      showNotification('Blog post deleted successfully!', 'success');
+      loadBlogPosts();
+  }
+}
+
+// View full blog post
+function viewFullBlogPost(id) {
+  const blogs = JSON.parse(localStorage.getItem('blogPosts')) || [];
+  const blog = blogs.find(b => b.id === id);
+  
+  if (!blog) return;
+  
+  const fullBlogModal = document.getElementById('fullBlogModal');
+  
+  // Populate modal content
+  document.getElementById('fullBlogTitle').textContent = blog.title;
+  document.getElementById('fullBlogAuthor').textContent = blog.author;
+  document.getElementById('fullBlogDate').textContent = blog.date;
+  document.getElementById('fullBlogCategory').innerHTML = `<span class="blog-category-tag">${blog.category}</span>`;
+  document.getElementById('fullBlogText').innerHTML = `<p>${blog.content.replace(/\n/g, '<br>')}</p>`;
+  
+  // Setup delete button
+  const deleteBtn = document.getElementById('deleteFullBlogBtn');
+  deleteBtn.onclick = () => {
+      if (confirm('Are you sure you want to delete this blog post?')) {
+          deleteBlogPost(id);
+          fullBlogModal.classList.remove('show');
+          document.body.style.overflow = 'auto';
+      }
+  };
+  
+  // Show modal
+  fullBlogModal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+// Close full blog modal
+function closeFullBlogModal() {
+  const fullBlogModal = document.getElementById('fullBlogModal');
+  fullBlogModal.classList.remove('show');
+  document.body.style.overflow = 'auto';
+}
+
+// Initialize Blog
+function initBlog() {
+  const writeBlogBtn = document.getElementById('writeBlogBtn');
+  const manageBlogBtn = document.getElementById('manageBlogBtn');
+  const blogModal = document.getElementById('blogModal');
+  const blogForm = document.getElementById('blogForm');
+  const closeModal = document.getElementById('closeModal');
+  const cancelBlogBtn = document.getElementById('cancelBlogBtn');
+  const closeFullBlogModalBtn = document.getElementById('closeFullBlogModal');
+  const fullBlogModal = document.getElementById('fullBlogModal');
+  const blogPasswordModal = document.getElementById('blogPasswordModal');
+  const closeBlogPasswordModal = document.getElementById('closeBlogPasswordModal');
+  const verifyPasswordBtn = document.getElementById('verifyPasswordBtn');
+  const cancelPasswordBtn = document.getElementById('cancelPasswordBtn');
+  const blogPassword = document.getElementById('blogPassword');
+  
+  if (!writeBlogBtn || !blogModal) return;
+  
+  // Open write blog modal
+  writeBlogBtn.addEventListener('click', () => {
+      blogModal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+  });
+  
+  // Open blog management (password protection)
+  if (manageBlogBtn) {
+      manageBlogBtn.addEventListener('click', () => {
+          blogPasswordModal.classList.add('show');
+          document.body.style.overflow = 'hidden';
+          if (blogPassword) blogPassword.focus();
+      });
+  }
+  
+  // Handle password verification
+  if (verifyPasswordBtn) {
+      verifyPasswordBtn.addEventListener('click', () => {
+          const enteredPassword = blogPassword.value.trim();
+          
+          if (enteredPassword === BLOG_PASSWORD) {
+              blogAuthenticatedSession = true;
+              showNotification('✓ Password verified! You can now manage and delete blogs.', 'success');
+              blogPasswordModal.classList.remove('show');
+              document.body.style.overflow = 'auto';
+              blogPassword.value = '';
+              
+              // Reload blogs to show delete buttons
+              loadBlogPosts();
+          } else {
+              showNotification('✗ Incorrect password! Try again.', 'error');
+              blogPassword.value = '';
+          }
+      });
+  }
+  
+  // Close password modal
+  if (closeBlogPasswordModal) {
+      closeBlogPasswordModal.addEventListener('click', () => {
+          blogPasswordModal.classList.remove('show');
+          document.body.style.overflow = 'auto';
+          blogPassword.value = '';
+          blogAuthenticatedSession = false;
+      });
+  }
+  
+  if (cancelPasswordBtn) {
+      cancelPasswordBtn.addEventListener('click', () => {
+          blogPasswordModal.classList.remove('show');
+          document.body.style.overflow = 'auto';
+          blogPassword.value = '';
+          blogAuthenticatedSession = false;
+      });
+  }
+  
+  // Allow password entry with Enter key
+  if (blogPassword) {
+      blogPassword.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+              verifyPasswordBtn.click();
+          }
+      });
+  }
+  
+  // Close write blog modal function
+  const closeWriteModalFunc = () => {
+      blogModal.classList.remove('show');
+      document.body.style.overflow = 'auto';
+      blogForm.reset();
+  };
+  
+  // Close write blog modal buttons
+  closeModal.addEventListener('click', closeWriteModalFunc);
+  cancelBlogBtn.addEventListener('click', closeWriteModalFunc);
+  
+  // Close write blog modal on background click
+  blogModal.addEventListener('click', (e) => {
+      if (e.target === blogModal) {
+          closeWriteModalFunc();
+      }
+  });
+  
+  // Close full blog modal
+  if (closeFullBlogModalBtn) {
+      closeFullBlogModalBtn.addEventListener('click', closeFullBlogModal);
+  }
+  
+  if (fullBlogModal) {
+      fullBlogModal.addEventListener('click', (e) => {
+          if (e.target === fullBlogModal) {
+              closeFullBlogModal();
+          }
+      });
+  }
+  
+  // Handle write blog form submission
+  if (blogForm) {
+      blogForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          
+          const title = document.getElementById('blogTitle').value.trim();
+          const category = document.getElementById('blogCategory').value;
+          const author = document.getElementById('blogAuthor').value.trim();
+          const content = document.getElementById('blogContent').value.trim();
+          
+          if (title && category && author && content) {
+              // Create blog post object
+              const blogPost = {
+                  id: Date.now(),
+                  title,
+                  category,
+                  author,
+                  content,
+                  date: new Date().toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                  })
+              };
+              
+              // Save to localStorage
+              saveBlogPost(blogPost);
+              
+              // Show success message
+              showNotification('Blog post published successfully!', 'success');
+              
+              // Close modal and reload posts
+              closeWriteModalFunc();
+              loadBlogPosts();
+          } else {
+              showNotification('Please fill in all fields', 'error');
+          }
+      });
+  }
+  
+  // Load blog posts on page load
+  loadBlogPosts();
+}
